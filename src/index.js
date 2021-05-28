@@ -15,6 +15,8 @@ const ProductCategory = require('./routes/ProductCategory');
 /* Adding Middleware */
 app.use(cors());
 app.use(bodyParser.json());
+app.use(express.static('public'));
+app.use('/images', express.static('public/images'));
 
 /* Creating access Routes */
 app.use('/product', Product);

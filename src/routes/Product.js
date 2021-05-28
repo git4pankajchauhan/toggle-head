@@ -2,6 +2,18 @@ const express = require('express');
 const Router = express.Router();
 const Product = require('../models/Product');
 
+const multer = require('multer');
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'public/images');
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + '-' + file.originalname);
+  },
+});
+
+const upload = multer({ storage: storage });
+
 /* Get All Product */
 Router.get('/', async (req, res) => {
   try {
@@ -13,17 +25,17 @@ Router.get('/', async (req, res) => {
 });
 
 /* Add New Product */
-Router.post('/', async (req, res) => {
+Router.post('/', upload.single('p_image'), async (req, res) => {
   try {
-    console.log(req.body);
     const available_in_arr = req.body.p_available_in.split(',');
+    const hostname = req.protocol + '://' + req.get('host');
     const productData = new Product({
       category_id: req.body.p_category_id,
-      img_src: req.body.p_img_src,
       name: req.body.p_name,
       description: req.body.p_description,
       available_in: available_in_arr,
       active: req.body.p_active,
+      img_src: `${hostname}/images/${req.file.filename}`,
     });
     await productData.save();
     res.status(201).json({ message: 'Product Added Successfully', status: true });
